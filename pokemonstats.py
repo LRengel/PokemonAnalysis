@@ -1,4 +1,4 @@
-import argparse_prompt
+import argparse
 import configparser
 import sqlite3
 import pandas as pd
@@ -10,14 +10,14 @@ DB_FILE = "database.ini"
 # when using parameters with sql lite use the :name syntax
 # ex. :name , params={"name": "value"}
 # TODO 2020-08-06 create a store for database queries (aka json file)
-
+# TODO 2020-08-08 Add in functionality for running on windows or linux
 queries = {}
 
 
 def connect_to_db(db_file):
     config = configparser.ConfigParser()
     config.read(db_file)
-    dbstring = Path(config["Database"]["database_string"])
+    dbstring = Path(config["Database"]["database_string_linux"])
     try:
         connection = sqlite3.connect(dbstring)
     except error as e:
@@ -36,7 +36,7 @@ def query_db(connection, parameters):
 
 
 def main():
-    prompt = argparse_prompt.PromptParser()
+    prompt = argparse.ArgumentParser()
     prompt.add_argument(
         "pokemon_type",
         help="please enter the pokemon type you want to stats on: ",
