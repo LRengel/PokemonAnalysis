@@ -1,2 +1,2 @@
 # PokemonAnalysis
-This code allows you to access the pokedex and allows you to query pokemon stats from it.
+This code allows you to access a pokedex database and can query the results.
