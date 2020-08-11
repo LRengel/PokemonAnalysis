@@ -1,35 +1,32 @@
 import argparse
-import configparser
 import sqlite3
 import pandas as pd
 
-from pathlib import Path
+from decouple import config
 
-DB_FILE = "database.ini"
+
 # Next steps are to create a function to query the database
 # when using parameters with sql lite use the :name syntax
 # ex. :name , params={"name": "value"}
 # TODO 2020-08-06 create a store for database queries (aka json file)
-# TODO 2020-08-08 Add in functionality for running on windows or linux
+
 queries = {}
 
 
-def connect_to_db(db_file):
-    config = configparser.ConfigParser()
-    config.read(db_file)
-    dbstring = Path(config["Database"]["database_string_linux"])
+def connect_to_db():
+    db_uri = config("L_DATABASEURI")
     try:
-        connection = sqlite3.connect(dbstring)
-    except error as e:
+        connection = sqlite3.connect(db_uri)
+    except sqlite3.Error as e:
         print(f"{e} has occured")
     return connection
 
 
-def query_db(connection, parameters):
+def query_db(connection, parameter):
     df = pd.read_sql(
-        "Select * from Pokedex Where Type=:p_type",
+        "Select * from Pokedex Where Type=:p_type or HP > 0",
         con=connection,
-        params={"p_type": parameters},
+        params={"p_type": parameter},
         index_col="index",
     )
     return df
@@ -42,8 +39,13 @@ def main():
         help="please enter the pokemon type you want to stats on: ",
         default="Grass Poison",
     )
+    prompt.add_argument(
+        "--saveresults",
+        help="enter the excel file name you want to save to",
+        default="pokemon.xlsx",
+    )
     args = prompt.parse_args()
-    connection = connect_to_db(DB_FILE)
+    connection = connect_to_db()
     df = query_db(connection, args.pokemon_type)
     print(f"Here are the stats for the {args.pokemon_type} pokemon\n")
     print(df.describe())
