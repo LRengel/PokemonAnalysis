@@ -9,11 +9,11 @@ from decouple import config
 # ex. :name , params={"name": "value"}
 # TODO 2020-08-06 create a store for database queries (aka json file)
 
+
 queries = {}
 
 
-def connect_to_db():
-    db_uri = config("L_DATABASEURI")
+def connect_to_db(db_uri):
     try:
         connection = sqlite3.connect(db_uri)
     except sqlite3.Error as e:
@@ -32,6 +32,8 @@ def query_db(connection, parameter):
 
 
 def main():
+    db_uri = config("L_DATABASEURI")
+    datafields = ["count", "min", "25%", "50%", "75%", "max"]
     prompt = argparse.ArgumentParser()
     prompt.add_argument(
         "pokemon_type",
@@ -39,17 +41,17 @@ def main():
         default="Grass Poison",
     )
     prompt.add_argument(
-        "--saveresults",
-        help="enter the csv file name you want to save to",
-        default="pokemon.csv",
+        "--saveresults", help="enter the csv file name you want to save to",
     )
     args = prompt.parse_args()
-    connection = connect_to_db()
+    connection = connect_to_db(db_uri)
     df = query_db(connection, args.pokemon_type)
-    print(f"Here are the stats for the {args.pokemon_type} pokemon\n")
-    print(df.describe())
+    print(f"Here are the stats for the {args.pokemon_type} pokemon.\n")
+    print(df.describe().loc[datafields])
     if args.saveresults:
         df.to_csv(f"{args.saveresults}.csv", index=False)
+    else:
+        print("done")
 
 
 if __name__ == "__main__":
