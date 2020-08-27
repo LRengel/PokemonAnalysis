@@ -24,11 +24,11 @@ def connect_to_db(db_uri):
     return connection
 
 
-def query_db(connection, parameter):
+def query_db(connection, parameter1, parameter2):
     df = pd.read_sql(
-        "Select * from Pokedex Where Type=:p_type",
+        "Select * from Pokedex Where Type1=:p_type",
         con=connection,
-        params={"p_type": parameter},
+        params={"p_type1": parameter1, "p_type2": parameter2},
         index_col="index",
     )
     return df
