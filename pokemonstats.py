@@ -9,6 +9,9 @@ from decouple import config
 # ex. :name , params={"name": "value"}
 # TODO 2020-08-06 create a store for database queries (aka json file)
 
+# This removes repeated name mega name with just name mega
+# df.Name.replace({r'(\w+\s)(Mega+\s\w+)': r'\2'}, regex=True, inplace=True)
+
 
 queries = {}
 
@@ -36,12 +39,12 @@ def main():
     datafields = ["count", "min", "25%", "50%", "75%", "max"]
     prompt = argparse.ArgumentParser()
     prompt.add_argument(
-        "pokemon_type",
-        help="please enter the pokemon type you want to stats on:",
-        default="Grass Poison",
+        "pokemon_type", help="please enter the pokemon type you want to stats on:",
     )
     prompt.add_argument(
-        "--saveresults", help="enter the csv file name you want to save to",
+        "--saveresults",
+        action="store_true",
+        help="enter the csv file name you want to save to",
     )
     args = prompt.parse_args()
     connection = connect_to_db(db_uri)

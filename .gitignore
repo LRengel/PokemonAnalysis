@@ -4,4 +4,6 @@ env*/
 database.ini
 .env
 .csv
+.db 
 data/
+notes.txt
