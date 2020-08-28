@@ -26,9 +26,9 @@ def connect_to_db(db_uri):
 
 def query_db(connection, parameter1, parameter2):
     df = pd.read_sql(
-        "Select * from Pokedex Where Type1=:p_type",
+        "Select * from Pokedex Where Type_1=:p_type Or Type_2=:sec_type",
         con=connection,
-        params={"p_type1": parameter1, "p_type2": parameter2},
+        params={"p_type": parameter1, "sec_type": parameter2},
         index_col="index",
     )
     return df
@@ -36,10 +36,13 @@ def query_db(connection, parameter1, parameter2):
 
 def main():
     db_uri = config("L_DATABASEURI")
-    datafields = ["count", "min", "25%", "50%", "75%", "max"]
+    # datafields = ["count", "min", "25%", "50%", "75%", "max"]
     prompt = argparse.ArgumentParser()
     prompt.add_argument(
-        "pokemon_type", help="please enter the pokemon type you want to stats on:",
+        "pokemon_type1", help="please enter the pokemon type you want to stats on:",
+    )
+    prompt.add_argument(
+        "pokemon_type2", help="please enter the pokemon type you want to stats on:"
     )
     prompt.add_argument(
         "--saveresults",
@@ -48,9 +51,11 @@ def main():
     )
     args = prompt.parse_args()
     connection = connect_to_db(db_uri)
-    df = query_db(connection, args.pokemon_type)
-    print(f"Here are the stats for the {args.pokemon_type} pokemon.\n")
-    print(df.describe().loc[datafields])
+    df = query_db(connection, args.pokemon_type1, args.pokemon_type2)
+    print(
+        f"Here are the stats for the {args.pokemon_type1} and {args.pokemon_type2} pokemon.\n"
+    )
+    print(df.describe())
     if args.saveresults:
         df.to_csv(f"{args.saveresults}.csv", index=False)
     else:
