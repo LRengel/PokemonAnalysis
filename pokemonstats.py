@@ -10,7 +10,7 @@ from decouple import config
 # TODO 2020-08-06 create a store for database queries (aka json file)
 
 # This removes repeated name mega name with just name mega
-# df.Name.replace({r'(\w+\s)(Mega+\s\w+)': r'\2'}, regex=True, inplace=True)
+# df.Name.replace({r'^\w+Mega\s': "Mega "}, regex=True, inplace=True)
 
 
 queries = {}
@@ -26,10 +26,10 @@ def connect_to_db(db_uri):
 
 def query_db(connection, parameter1, parameter2):
     df = pd.read_sql(
-        "Select * from Pokedex Where Type_1=:p_type Or Type_2=:sec_type",
+        "Select * from Pokedex Where Type_1=:p_type and Type_2=:sec_type",
         con=connection,
         params={"p_type": parameter1, "sec_type": parameter2},
-        index_col="index",
+        index_col="id",
     )
     return df
 
@@ -39,7 +39,7 @@ def main():
     # datafields = ["count", "min", "25%", "50%", "75%", "max"]
     prompt = argparse.ArgumentParser()
     prompt.add_argument(
-        "pokemon_type1", help="please enter the pokemon type you want to stats on:",
+        "pokemon_type1", help="please enter the pokemon type you want to stats on:"
     )
     prompt.add_argument(
         "pokemon_type2", help="please enter the pokemon type you want to stats on:"
@@ -52,9 +52,12 @@ def main():
     args = prompt.parse_args()
     connection = connect_to_db(db_uri)
     df = query_db(connection, args.pokemon_type1, args.pokemon_type2)
-    print(
-        f"Here are the stats for the {args.pokemon_type1} and {args.pokemon_type2} pokemon.\n"
-    )
+    if args.pokemon_type2 == " ":
+        print(f"Here are the stats for the {args.pokemon_type1} type pokemon.\n")
+    else:
+        print(
+            f"Here are the stats for the {args.pokemon_type1} and {args.pokemon_type2} type pokemon.\n"
+        )
     print(df.describe())
     if args.saveresults:
         df.to_csv(f"{args.saveresults}.csv", index=False)
