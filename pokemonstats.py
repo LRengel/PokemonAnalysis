@@ -17,8 +17,10 @@ queries = {}
 
 
 def connect_to_db(db_uri):
+    connection = None
     try:
         connection = sqlite3.connect(db_uri)
+        return connection
     except sqlite3.Error as e:
         print(f"{e} has occured")
     return connection
@@ -39,10 +41,10 @@ def main():
     # datafields = ["count", "min", "25%", "50%", "75%", "max"]
     prompt = argparse.ArgumentParser()
     prompt.add_argument(
-        "pokemon_type1", help="please enter the pokemon type you want to stats on:"
+        "pokemon_type1", help="please enter the pokemon type1 you want to stats on:"
     )
     prompt.add_argument(
-        "pokemon_type2", help="please enter the pokemon type you want to stats on:"
+        "pokemon_type2", help="please enter the pokemon type2 you want to stats on:"
     )
     prompt.add_argument(
         "--saveresults",
@@ -53,16 +55,16 @@ def main():
     connection = connect_to_db(db_uri)
     df = query_db(connection, args.pokemon_type1, args.pokemon_type2)
     if args.pokemon_type2 == " ":
-        print(f"Here are the stats for the {args.pokemon_type1} type pokemon.\n")
+        print(f"\nHere are the stats for the {args.pokemon_type1} type pokemon.\n")
     else:
         print(
-            f"Here are the stats for the {args.pokemon_type1} and {args.pokemon_type2} type pokemon.\n"
+            f"\nHere are the stats for the {args.pokemon_type1} and {args.pokemon_type2} type pokemon.\n"
         )
-    print(df.describe())
+    print(f"{df.describe()}\n")
     if args.saveresults:
         df.to_csv(f"{args.saveresults}.csv", index=False)
     else:
-        print("done")
+        print("Query Completed")
 
 
 if __name__ == "__main__":
