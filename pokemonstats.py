@@ -1,6 +1,6 @@
 import argparse
 import sqlite3
-
+import sqlalchemy
 import pandas as pd
 from decouple import config
 
@@ -8,12 +8,9 @@ from decouple import config
 # when using parameters with sql lite use the :name syntax
 # ex. :name , params={"name": "value"}
 # TODO 2020-08-06 create a store for database queries (aka json file)
-
+# TODO 2020-09-07 deal with connecting to different dbs
 # This removes repeated name mega name with just name mega
 # df.Name.replace({r'^\w+Mega\s': "Mega "}, regex=True, inplace=True)
-
-
-queries = {}
 
 
 def connect_to_db(db_uri):
@@ -23,6 +20,16 @@ def connect_to_db(db_uri):
         return connection
     except sqlite3.Error as e:
         print(f"{e} has occured")
+    return connection
+
+
+def connect_db_alchemy(db_uri):
+    connection = None
+    try:
+        connection = sqlalchemy.create_engine(db_uri)
+        return connection
+    except sqlalchemy.exc.IntegrityError as e:
+        print(f"{e} occured")
     return connection
 
 
@@ -37,7 +44,7 @@ def query_db(connection, parameter1, parameter2):
 
 
 def main():
-    db_uri = config("L_DATABASEURI")
+    db_uri = config("L_DB_STRING")
     # datafields = ["count", "min", "25%", "50%", "75%", "max"]
     prompt = argparse.ArgumentParser()
     prompt.add_argument(
@@ -52,7 +59,7 @@ def main():
         help="enter the csv file name you want to save to",
     )
     args = prompt.parse_args()
-    connection = connect_to_db(db_uri)
+    connection = connect_db_alchemy(db_uri)
     df = query_db(connection, args.pokemon_type1, args.pokemon_type2)
     if args.pokemon_type2 == " ":
         print(f"\nHere are the stats for the {args.pokemon_type1} type pokemon.\n")
