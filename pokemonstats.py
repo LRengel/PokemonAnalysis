@@ -1,5 +1,4 @@
 import argparse
-import sqlite3
 import sqlalchemy
 import pandas as pd
 from decouple import config
@@ -9,18 +8,9 @@ from decouple import config
 # ex. :name , params={"name": "value"}
 # TODO 2020-08-06 create a store for database queries (aka json file)
 # TODO 2020-09-07 deal with connecting to different dbs
+
 # This removes repeated name mega name with just name mega
 # df.Name.replace({r'^\w+Mega\s': "Mega "}, regex=True, inplace=True)
-
-
-def connect_to_db(db_uri):
-    connection = None
-    try:
-        connection = sqlite3.connect(db_uri)
-        return connection
-    except sqlite3.Error as e:
-        print(f"{e} has occured")
-    return connection
 
 
 def connect_db_alchemy(db_uri):
