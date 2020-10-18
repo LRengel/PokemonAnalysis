@@ -8,6 +8,7 @@ from decouple import config
 # ex. :name , params={"name": "value"}
 # TODO 2020-08-06 create a store for database queries (aka json file)
 # TODO 2020-09-07 deal with connecting to different dbs
+# TODO 2020-09-10 deal with empty data frames df.empty
 
 # This removes repeated name mega name with just name mega
 # df.Name.replace({r'^\w+Mega\s': "Mega "}, regex=True, inplace=True)
@@ -23,7 +24,7 @@ def connect_db_alchemy(db_uri):
     return connection
 
 
-def query_db(connection, parameter1, parameter2):
+def query_db(connection, parameter1, parameter2=" "):
     df = pd.read_sql(
         "Select * from Pokedex Where Type_1=:p_type and Type_2=:sec_type",
         con=connection,
@@ -35,13 +36,15 @@ def query_db(connection, parameter1, parameter2):
 
 def main():
     db_uri = config("L_DB_STRING")
-    # datafields = ["count", "min", "25%", "50%", "75%", "max"]
+    datafields = ["count", "min", "25%", "50%", "75%", "max"]
     prompt = argparse.ArgumentParser()
     prompt.add_argument(
         "pokemon_type1", help="please enter the pokemon type1 you want to stats on:"
     )
     prompt.add_argument(
-        "pokemon_type2", help="please enter the pokemon type2 you want to stats on:"
+        "--pokemon_type2",
+        help="please enter the pokemon type2 you want to stats on:",
+        default=" ",
     )
     prompt.add_argument(
         "--saveresults",
@@ -57,7 +60,7 @@ def main():
         print(
             f"\nHere are the stats for the {args.pokemon_type1} and {args.pokemon_type2} type pokemon.\n"
         )
-    print(f"{df.describe()}\n")
+    print(f"{df.describe().loc[datafields,:]}\n")
     if args.saveresults:
         df.to_csv(f"{args.saveresults}.csv", index=False)
     else:
